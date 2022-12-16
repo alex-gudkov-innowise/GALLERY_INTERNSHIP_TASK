@@ -1,21 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/sequelize';
-import { CreateUserDTO } from './DTO/CreateUser.DTO';
-import { User } from './users.model';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { UsersEntity } from './users.entity';
+import { CreateUserDTO } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService
 {
-    constructor(@InjectModel(User) private userRepository: typeof User) {}
+    constructor(
+        @InjectRepository(UsersEntity) private readonly UsersRepository: Repository<UsersEntity>,
+    ) {}
 
-    async CreateUser(dto: CreateUserDTO)
+    async GetAllUsers(): Promise<UsersEntity[]>
     {
-        const user = await this.userRepository.create(dto);
+        const allUsers = await this.UsersRepository.find();
+        return allUsers;
+    }
+
+    async GetUserById(id: number): Promise<UsersEntity>
+    {
+        const user = await this.UsersRepository.findOneBy({ id: id });
         return user;
     }
-    async GetAllUsers()
+
+    async DeleteUserById(id: number): Promise<any>
     {
-        const allUsers = await this.userRepository.findAll();
-        return allUsers;
+        await this.UsersRepository.delete({ id: id });
+        return { id: id };
+    }
+
+    async UpdateUserById(id: number, dto: CreateUserDTO): Promise<UsersEntity>
+    {
+        const user = await this.UsersRepository.findOneBy({ id: id });
+        user.email = dto.email;
+        user.password = dto.password;
+        return this.UsersRepository.save(user);    
+    }
+
+    async CreateUser(dto: CreateUserDTO): Promise<UsersEntity>
+    {
+        const user = this.UsersRepository.create(dto);
+        return this.UsersRepository.save(user);    
     }
 };
