@@ -23,6 +23,12 @@ export class UsersService
         return user;
     }
 
+    async GetUserByEmail(email: string): Promise<UsersEntity>
+    {
+        const user = await this.UsersRepository.findOneBy({ email: email });
+        return user;
+    }
+
     async DeleteUserById(id: number): Promise<any>
     {
         await this.UsersRepository.delete({ id: id });
