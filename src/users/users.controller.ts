@@ -1,41 +1,23 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
-import { CreateUserDTO } from './dto/create-user.dto';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('users')
 export class UsersController
 {
-    constructor(
-        private readonly userService: UsersService
-    ) {}
+    constructor(private readonly userService: UsersService) {}
 
-    @Post()
-    Create(@Body() dto: CreateUserDTO)
-    {
-        return this.userService.CreateUser(dto);
-    }
-
-    @Put(':id')
-    Update(@Param('id') id: number, @Body() dto: CreateUserDTO)
-    {
-        return this.userService.UpdateUserById(id, dto);
-    }
-
+    @UseGuards(AuthGuard)
     @Get()
     GetAll()
     {
         return this.userService.GetAllUsers();
     }
     
+    @UseGuards(AuthGuard)
     @Get(':id')
     GetById(@Param('id') id: number)
     {
         return this.userService.GetUserById(id);
-    }
-
-    @Delete(':id')
-    Delete(@Param('id') id: number)
-    {
-        return this.userService.DeleteUserById(id);
     }
 };

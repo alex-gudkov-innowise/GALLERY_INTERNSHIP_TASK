@@ -29,7 +29,7 @@ export class UsersService
         return user;
     }
 
-    async DeleteUserById(id: number): Promise<any>
+    async DeleteUserById(id: number): Promise<{ id: number }>
     {
         await this.UsersRepository.delete({ id: id });
         return { id: id };
