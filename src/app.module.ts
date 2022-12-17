@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { UsersEntity } from './users/users.entity';
 import { AuthModule } from './auth/auth.module';
+import { RefreshTokensEntity } from './auth/refresh-tokens.entity';
 
 @Module({
     controllers: [],
@@ -19,7 +20,7 @@ import { AuthModule } from './auth/auth.module';
             username: process.env.POSTGRES_USERNAME,
             password: process.env.POSTGRES_PASSWORD,
             database: process.env.POSTGRES_DATABASE,
-            entities: [UsersEntity],
+            entities: [UsersEntity, RefreshTokensEntity],
             synchronize: true,
           }),
         UsersModule,

@@ -8,44 +8,44 @@ import { CreateUserDTO } from './dto/create-user.dto';
 export class UsersService
 {
     constructor(
-        @InjectRepository(UsersEntity) private readonly UsersRepository: Repository<UsersEntity>,
+        @InjectRepository(UsersEntity) private readonly usersRepository: Repository<UsersEntity>,
     ) {}
 
     async GetAllUsers(): Promise<UsersEntity[]>
     {
-        const allUsers = await this.UsersRepository.find();
+        const allUsers = await this.usersRepository.find();
         return allUsers;
     }
 
     async GetUserById(id: number): Promise<UsersEntity>
     {
-        const user = await this.UsersRepository.findOneBy({ id: id });
+        const user = await this.usersRepository.findOneBy({ id: id });
         return user;
     }
 
     async GetUserByEmail(email: string): Promise<UsersEntity>
     {
-        const user = await this.UsersRepository.findOneBy({ email: email });
+        const user = await this.usersRepository.findOneBy({ email: email });
         return user;
     }
 
     async DeleteUserById(id: number): Promise<{ id: number }>
     {
-        await this.UsersRepository.delete({ id: id });
+        await this.usersRepository.delete({ id: id });
         return { id: id };
     }
 
     async UpdateUserById(id: number, dto: CreateUserDTO): Promise<UsersEntity>
     {
-        const user = await this.UsersRepository.findOneBy({ id: id });
+        const user = await this.usersRepository.findOneBy({ id: id });
         user.email = dto.email;
         user.password = dto.password;
-        return this.UsersRepository.save(user);    
+        return await this.usersRepository.save(user);    
     }
 
     async CreateUser(dto: CreateUserDTO): Promise<UsersEntity>
     {
-        const user = this.UsersRepository.create(dto);
-        return this.UsersRepository.save(user);    
+        const user = this.usersRepository.create(dto);
+        return await this.usersRepository.save(user);    
     }
 };

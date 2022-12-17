@@ -3,18 +3,18 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt/dist';
 import { UsersModule } from 'src/users/users.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { RefreshTokensEntity } from './refresh-tokens.entity';
+import { UsersEntity } from 'src/users/users.entity';
 
 @Module({
     controllers: [AuthController],
     providers: [AuthService],
     imports: [
         forwardRef(() => UsersModule), // use forwardRef() to avoid circular dependency between modules
-        JwtModule.register({ // register the module
-            secret: process.env.PRIVATE_KEY ?? 'SECRET', // generation secret key
-            signOptions: { // token options
-                expiresIn: '24h' // token expiration time
-            }
-        })
+        TypeOrmModule.forFeature([RefreshTokensEntity, UsersEntity]),
+        JwtModule.register({}), // register the module 
+        forwardRef(() => AuthModule) // use forwardRef() to avoid circular dependency between modules
     ],
     exports: [
         AuthService,

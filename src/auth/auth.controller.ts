@@ -1,8 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDTO } from 'src/users/dto/create-user.dto';
 import { SignUpUserDTO } from './dto/sign-in-user.dto';
 import { SignInUserDTO } from './dto/sign-up-user.dto';
+import { RefreshTokenDTO } from './dto/refresh-token.dto';
+import { AuthGuard } from './auth.guard';
 
 @Controller('auth')
 export class AuthController
@@ -25,5 +27,22 @@ export class AuthController
         console.log('/auth/sign-in');
         
         return this.authService.SignInUser(dto);
+    }
+
+    @Post('/new-token')
+    GetNewToken(@Body() dto: RefreshTokenDTO)
+    {
+        console.log('/new-token');
+
+        return this.authService.GetNewAccessToken(dto);
+    }
+
+    @UseGuards(AuthGuard)
+    @Post('/sign-out')
+    SignOut(@Body() dto: RefreshTokenDTO)
+    {
+        console.log('/sign-out');
+        
+        return this.authService.SignOutUser(dto);
     }
 };

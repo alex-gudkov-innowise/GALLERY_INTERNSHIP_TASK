@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { RefreshTokensEntity } from 'src/auth/refresh-tokens.entity';
+import { Entity, Column, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity({name: 'users'})
 export class UsersEntity
@@ -14,4 +15,7 @@ export class UsersEntity
 
     @Column({ default: false })
     isAdmin: boolean;
+
+    @OneToMany(() => RefreshTokensEntity, (refreshToken) => refreshToken.refreshToken)
+    refreshTokens: RefreshTokensEntity[];
 };
