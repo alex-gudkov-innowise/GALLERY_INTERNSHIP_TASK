@@ -9,14 +9,14 @@ export class UsersController
 
     @UseGuards(AuthGuard)
     @Get()
-    GetAll()
+    GetAllUsers()
     {
         return this.userService.GetAllUsers();
     }
     
     @UseGuards(AuthGuard)
     @Get(':id')
-    GetById(@Param('id') id: number)
+    GetUserById(@Param('id') id: number)
     {
         return this.userService.GetUserById(id);
     }

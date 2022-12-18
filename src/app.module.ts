@@ -5,6 +5,8 @@ import { UsersModule } from './users/users.module';
 import { UsersEntity } from './users/users.entity';
 import { AuthModule } from './auth/auth.module';
 import { RefreshTokensEntity } from './auth/refresh-tokens.entity';
+import { GalleryModule } from './gallery/gallery.module';
+import { ContentEntity } from './gallery/content.entity';
 
 @Module({
     controllers: [],
@@ -20,11 +22,12 @@ import { RefreshTokensEntity } from './auth/refresh-tokens.entity';
             username: process.env.POSTGRES_USERNAME,
             password: process.env.POSTGRES_PASSWORD,
             database: process.env.POSTGRES_DATABASE,
-            entities: [UsersEntity, RefreshTokensEntity],
+            entities: [UsersEntity, RefreshTokensEntity, ContentEntity],
             synchronize: true,
           }),
         UsersModule,
         AuthModule,
+        GalleryModule,
     ]
 })
 export class AppModule {};

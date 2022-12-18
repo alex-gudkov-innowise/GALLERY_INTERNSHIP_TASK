@@ -14,7 +14,7 @@ export class AuthController
     ) {}
 
     @Post('/sign-up')
-    SignUp(@Body() dto: SignUpUserDTO)
+    SignUpUser(@Body() dto: SignUpUserDTO)
     {
         console.log('/auth/sign-up');
 
@@ -22,7 +22,7 @@ export class AuthController
     }
     
     @Post('/sign-in')
-    SignIn(@Body() dto: SignInUserDTO)
+    SignInUser(@Body() dto: SignInUserDTO)
     {
         console.log('/auth/sign-in');
         
@@ -30,7 +30,7 @@ export class AuthController
     }
 
     @Post('/new-token')
-    GetNewToken(@Body() dto: RefreshTokenDTO)
+    GetNewAccessToken(@Body() dto: RefreshTokenDTO)
     {
         console.log('/new-token');
 
@@ -39,7 +39,7 @@ export class AuthController
 
     @UseGuards(AuthGuard)
     @Post('/sign-out')
-    SignOut(@Body() dto: RefreshTokenDTO)
+    SignOutUser(@Body() dto: RefreshTokenDTO)
     {
         console.log('/sign-out');
         
