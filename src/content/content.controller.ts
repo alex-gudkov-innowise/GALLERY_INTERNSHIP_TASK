@@ -1,14 +1,15 @@
 import { Body, Controller, Get, Param, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { GalleryService } from './gallery.service';
-import { PostContentDTO } from './dto/post-content.dto';
-// import { Request } from 'express';
+import { PostContentDTO } from '../content/dto/post-content.dto';
+import { ContentService } from './content.service';
 
 @Controller('content')
-export class GalleryController
+export class ContentController
 {
-    constructor(private readonly galleryService: GalleryService) {}
+    constructor(
+        private readonly contentService: ContentService,
+    ) {}
 
     @UseGuards(AuthGuard)
     @Post('upload')
@@ -21,7 +22,7 @@ export class GalleryController
     {
         const myId = request.user.id;
 
-        return this.galleryService.PostMyContent(myId, dto, contentFile);
+        return this.contentService.PostMyContent(myId, dto, contentFile);
     }
 
     @Get('video/:fileName')
@@ -31,6 +32,6 @@ export class GalleryController
         @Res() response: any,
     )
     {
-        return this.galleryService.LoadVideoStream(fileName, request, response);
+        return this.contentService.LoadVideoStream(fileName, request, response);
     }
 };

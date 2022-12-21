@@ -5,10 +5,10 @@ import { UsersModule } from './users/users.module';
 import { UsersEntity } from './users/users.entity';
 import { AuthModule } from './auth/auth.module';
 import { RefreshTokensEntity } from './auth/refresh-tokens.entity';
-import { GalleryModule } from './gallery/gallery.module';
-import { ContentEntity } from './gallery/content.entity';
+import { ContentEntity } from './content/content.entity';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'path';
+import { ContentModule } from './content/content.module';
 
 @Module({
     controllers: [],
@@ -32,7 +32,7 @@ import * as path from 'path';
         }),
         UsersModule,
         AuthModule,
-        GalleryModule,
+        ContentModule,
     ]
 })
 export class AppModule {};

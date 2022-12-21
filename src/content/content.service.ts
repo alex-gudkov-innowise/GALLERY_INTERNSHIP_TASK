@@ -1,15 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ContentEntity } from './content.entity';
+import { ContentEntity } from '../content/content.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PostContentDTO } from './dto/post-content.dto';
+import { PostContentDTO } from '../content/dto/post-content.dto';
 import * as path from 'path';
 import * as uuid from 'uuid';
 import * as fs from 'fs';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
-export class GalleryService
+export class ContentService
 {
     constructor(
         @InjectRepository(ContentEntity) private readonly contentRepository: Repository<ContentEntity>,
@@ -36,13 +36,10 @@ export class GalleryService
 
     async LoadVideoStream(fileName: string, request: any, response: any)
     {
-        console.log(__dirname);
-        
         const fileUrl = path.join(__dirname, '..', 'content', 'video', fileName);
         const fileStat = await fs.promises.stat(fileUrl);
         const fileSize = fileStat.size;
         const range = request.headers.range;
-        console.log(fileStat);
         
         if (range)
         {
@@ -103,12 +100,10 @@ export class GalleryService
 
             // write file to the storage
             const writeStream = fs.createWriteStream(path.join(filePath, fileName));
-            
             writeStream.on('error', (error) =>
             {
                 console.error(error);
             });
-
             writeStream.write(contentFile.buffer);
             writeStream.end();
 
