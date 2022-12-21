@@ -1,12 +1,11 @@
-import { Body, Controller, Get, Param, Post, Query, Req, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { GalleryService } from './gallery.service';
 import { PostContentDTO } from './dto/post-content.dto';
-import { Res } from '@nestjs/common/decorators';
 // import { Request } from 'express';
 
-@Controller('gallery')
+@Controller('content')
 export class GalleryController
 {
     constructor(private readonly galleryService: GalleryService) {}
@@ -23,5 +22,15 @@ export class GalleryController
         const myId = request.user.id;
 
         return this.galleryService.PostMyContent(myId, dto, contentFile);
+    }
+
+    @Get('video/:fileName')
+    LoadVideoStream(
+        @Param('fileName') fileName: string,
+        @Req() request: any,
+        @Res() response: any,
+    )
+    {
+        return this.galleryService.LoadVideoStream(fileName, request, response);
     }
 };

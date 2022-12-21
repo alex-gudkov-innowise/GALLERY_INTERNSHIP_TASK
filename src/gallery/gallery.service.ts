@@ -34,6 +34,50 @@ export class GalleryService
         return images;
     }
 
+    async LoadVideoStream(fileName: string, request: any, response: any)
+    {
+        console.log(__dirname);
+        
+        const fileUrl = path.join(__dirname, '..', 'content', 'video', fileName);
+        const fileStat = await fs.promises.stat(fileUrl);
+        const fileSize = fileStat.size;
+        const range = request.headers.range;
+        console.log(fileStat);
+        
+        if (range)
+        {
+            const parts = range.replace('bytes=', '').split('-');
+            const start = parseInt(parts[0]);
+            const end = parts[1] ? parseInt(parts[1]) : fileSize - 1;
+            const chunkSize = (end - start) + 1;
+
+            const head = {
+                'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                'Accept-Ranges': 'bytes',
+                'Content-Length': chunkSize,
+                'Content-Type': 'video/mp4',
+            };
+            response.writeHead(206, head); // 206 - partial content
+            
+            const readStream = fs.createReadStream(fileUrl, {
+                start: start,
+                end: end,
+            });
+            readStream.pipe(response);
+        }
+        else
+        {
+            const head = {
+                'Content-Length': fileSize,
+                'Content-Type': 'video/mp4',
+            };
+            response.writeHead(200, head);
+
+            const readStream = fs.createReadStream(fileUrl);
+            readStream.pipe(response);
+        }
+    }
+
     async PostMyContent(myId: number, dto: PostContentDTO, contentFile: Express.Multer.File)
     {
         try
