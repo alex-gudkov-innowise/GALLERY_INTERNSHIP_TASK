@@ -17,6 +17,9 @@ export class ContentEntity
     fileExt: string;
 
     @Column()
+    type: string;
+
+    @Column()
     description: string;
 
     @ManyToOne(() => UsersEntity, (user) => user.id)

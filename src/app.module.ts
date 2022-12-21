@@ -7,11 +7,16 @@ import { AuthModule } from './auth/auth.module';
 import { RefreshTokensEntity } from './auth/refresh-tokens.entity';
 import { GalleryModule } from './gallery/gallery.module';
 import { ContentEntity } from './gallery/content.entity';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import * as path from 'path';
 
 @Module({
     controllers: [],
     providers: [],
     imports: [
+        ServeStaticModule.forRoot({
+            rootPath: path.join(__dirname, 'content', 'image'),
+        }),
         ConfigModule.forRoot({
             envFilePath: `./.${process.env.NODE_ENV}.env`
         }),
@@ -24,7 +29,7 @@ import { ContentEntity } from './gallery/content.entity';
             database: process.env.POSTGRES_DATABASE,
             entities: [UsersEntity, RefreshTokensEntity, ContentEntity],
             synchronize: true,
-          }),
+        }),
         UsersModule,
         AuthModule,
         GalleryModule,

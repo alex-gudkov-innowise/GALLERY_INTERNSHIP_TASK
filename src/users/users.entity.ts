@@ -17,6 +17,9 @@ export class UsersEntity
     @Column({ default: false })
     isAdmin: boolean;
 
+    // @Column()
+    // hiddenFrom: string;
+
     // one user can have many refresh tokens
     @OneToMany(() => RefreshTokensEntity, (refreshToken) => refreshToken.refreshToken)
     refreshTokens: RefreshTokensEntity[];
