@@ -57,7 +57,7 @@ export class ContentService
         return await this.contentRepository.delete({ id: contentId });
     }
 
-    async CloseSpecificContentForSpecificUser(contentId: number, myUserId: number, userId: number)
+    async CloseOneContentForOneUser(contentId: number, myUserId: number, userId: number)
     {
         // get entities from database
         const content = await this.contentRepository.findOne({ 
@@ -88,7 +88,7 @@ export class ContentService
         return await this.closedContentRepository.save(closedContent);
     }
 
-    async CloseAllContentForSpecificUser(myUserId: number, userId: number)
+    async CloseAllContentForOneUser(myUserId: number, userId: number)
     {
         const user = await this.usersService.GetUserById(userId);
         if (!user)

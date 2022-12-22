@@ -23,25 +23,25 @@ export class ContentController
 
     @UseGuards(AuthGuard)
     @Patch(':contentId/close/:userId') // close a specific image/video for a specific user
-    CloseSpecificContentForSpecificUser(
+    CloseOneContentForOneUser(
         @Req() request: any,
         @Param('contentId') contentId: number,
         @Param('userId') userId: number
     ){
         const myUserId: number = request.user.id; // used to check that content belongs to my user 
 
-        return this.contentService.CloseSpecificContentForSpecificUser(contentId, myUserId, userId);
+        return this.contentService.CloseOneContentForOneUser(contentId, myUserId, userId);
     }
 
     @UseGuards(AuthGuard)
     @Patch('close/:userId') // close all images/videos for a specific user
-    CloseAllContentForSpecificUser(
+    CloseAllContentForOneUser(
         @Req() request: any,
         @Param('userId') userId: number
     ){
         const myUserId: number = request.user.id;
 
-        return this.contentService.CloseAllContentForSpecificUser(myUserId, userId);
+        return this.contentService.CloseAllContentForOneUser(myUserId, userId);
     }
     
     @UseGuards(AuthGuard)
