@@ -7,6 +7,7 @@ import { EditContentDTO } from './dto/edit-content.dto';
 import { CreateContentDTO } from './dto/create-content.dto';
 import { FilesService } from 'src/files/files.service';
 import { ClosedContentEntity } from './closed-content.entity';
+import { async } from 'rxjs';
 
 @Injectable()
 export class ContentService
@@ -56,7 +57,7 @@ export class ContentService
         return await this.contentRepository.delete({ id: contentId });
     }
 
-    async CloseContent(contentId: number, myUserId: number, userId: number)
+    async CloseSpecificContentForSpecificUser(contentId: number, myUserId: number, userId: number)
     {
         // get entities from database
         const content = await this.contentRepository.findOne({ 
@@ -79,14 +80,46 @@ export class ContentService
             throw new HttpException('specified user not registered', HttpStatus.NOT_FOUND);   
         }
 
-        // 
+        // add new record to database
         const closedContent = this.closedContentRepository.create({
             content: content,
             user: user,
         });
-        await this.closedContentRepository.save(closedContent);
+        return await this.closedContentRepository.save(closedContent);
+    }
 
-        return 'closedContent';
+    async CloseAllContentForSpecificUser(myUserId: number, userId: number)
+    {
+        const user = await this.usersService.GetUserById(userId);
+        if (!user)
+        {
+            throw new HttpException('specified user not registered', HttpStatus.NOT_FOUND);   
+        }
+
+        return await this.contentRepository.query(`
+            INSERT INTO closed_content("userId", "contentId")
+            (
+                SELECT $1 AS id_user, content.id AS id_content
+                FROM content
+                WHERE content."userId" = $2
+                EXCEPT
+                SELECT closed_content."userId", closed_content."contentId" FROM closed_content
+            );
+        `, [userId, myUserId]);
+    }
+    
+    async CloseAllContentForAllUsers(myUserId: number)
+    {
+        return await this.contentRepository.query(`
+            INSERT INTO closed_content("userId", "contentId")
+            (
+                SELECT users.id AS id_user, content.id AS id_content
+                FROM content, users
+                WHERE content."userId" = $1 AND users.id != $1
+                EXCEPT
+                SELECT closed_content."userId", closed_content."contentId" FROM closed_content
+            );
+        `, [myUserId]);
     }
 
     async GetUserVideos(userId: number, myUserId: number)
