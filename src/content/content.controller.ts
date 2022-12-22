@@ -12,20 +12,6 @@ export class ContentController
         private readonly contentService: ContentService,
     ) {}
 
-    
-    @UseGuards(AuthGuard)
-    @Patch(':contentId/edit')
-    EditContent(
-        @Body() dto: EditContentDTO,
-        @Param('contentId') contentId: number,
-        @Req() request: any,
-    )
-    {
-        const userId: number = request.user.id;
-
-        return this.contentService.EditContent(contentId, userId, dto);
-    }
-
     @UseGuards(AuthGuard)
     @Delete(':contentId/remove')
     RemoveContent(
@@ -33,9 +19,9 @@ export class ContentController
         @Param('contentId') contentId: number,
     )
     {
-        const userId: number = request.user.id;
+        const myUserId: number = request.user.id;
 
-        return this.contentService.RemoveContent(contentId, userId);
+        return this.contentService.RemoveContent(contentId, myUserId);
     }
 
     @UseGuards(AuthGuard)
@@ -47,9 +33,9 @@ export class ContentController
         @Req() request: any,
     )
     {
-        const userId: number = request.user.id;
+        const myUserId: number = request.user.id;
 
-        return this.contentService.CreateContent(contentFile, userId, dto);
+        return this.contentService.CreateContent(contentFile, myUserId, dto);
     }
 
     @Get('video/:fileName')

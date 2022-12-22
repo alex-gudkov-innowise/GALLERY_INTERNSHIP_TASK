@@ -16,32 +16,42 @@ export class ContentService
         private readonly filesService: FilesService,
     ) {}
 
-    async CreateContent(contentFile: Express.Multer.File, userId: number, dto: CreateContentDTO)
+    async CreateContent(contentFile: Express.Multer.File, myUserId: number, dto: CreateContentDTO)
     {
         const fileInfo = await this.filesService.CreateFile(contentFile);
 
         // add uploaded content to database
-        const user = await this.usersService.GetUserById(userId);
+        const myUser = await this.usersService.GetUserById(myUserId);
         const content = this.contentRepository.create({
             fileName: fileInfo.name,
             fileExt: fileInfo.ext,
             type: fileInfo.type,
             description: dto.description,
-            user: user
+            user: myUser,
         });
         await this.contentRepository.save(content);
 
         return { fileName: fileInfo.name };
     }
     
-    async RemoveContent(contentId: number, userId: number)
+    async RemoveContent(contentId: number, myUserId: number)
     {
-        return 1;
-    }
+        const content = await this.contentRepository.findOne({ 
+            where: { id: contentId },
+            relations: { user: true } // include user entity into related content entity
+        });
 
-    async EditContent(contentId: number, userId: number, dto: EditContentDTO)
-    {
-        return 2;
+        if (!content)
+        {
+            throw new HttpException('content not found', HttpStatus.NOT_FOUND);   
+        }
+        if (content.user.id !== myUserId)
+        {
+            throw new HttpException('user has no access to content', HttpStatus.FORBIDDEN);   
+        }
+
+        // delete record from database
+        return await this.contentRepository.delete({ id: contentId });
     }
 
     async GetUserVideos(id: number)
