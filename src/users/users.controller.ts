@@ -13,26 +13,20 @@ export class UsersController
 
     @UseGuards(AuthGuard)
     @Get(':id/images')
-    GetUserImages(
-        @Param('id') id: number,
-        @Req() req: any,
-    )
+    GetUserImages(@Param('id') id: number, @Req() req: any)
     {
-        const myId = req.user.id;
+        const myUserId = req.user.id;
 
-        return this.contentService.GetUserImages(id);
+        return this.contentService.GetUserImages(id, myUserId);
     }
 
     @UseGuards(AuthGuard)
     @Get(':id/videos')
-    GetUserVideos(
-        @Param('id') id: number,
-        @Req() req: any,
-    )
+    GetUserVideos(@Param('id') id: number, @Req() req: any)
     {
-        const myId = req.user.id;
+        const myUserId = req.user.id;
         
-        return this.contentService.GetUserVideos(id);
+        return this.contentService.GetUserVideos(id, myUserId);
     }
 
     @UseGuards(AuthGuard)

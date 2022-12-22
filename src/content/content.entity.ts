@@ -1,5 +1,6 @@
 import { UsersEntity } from 'src/users/users.entity';
-import { Entity, Column, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, ManyToOne, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { ClosedContentEntity } from './closed-content.entity';
 
 @Entity({name: 'content'})
 export class ContentEntity
@@ -19,6 +20,10 @@ export class ContentEntity
     @Column()
     description: string;
 
-    @ManyToOne(() => UsersEntity, (user) => user.id)
+    @ManyToOne(() => UsersEntity, (user: UsersEntity) => user.id)
     user: UsersEntity;
+
+    // 
+    @OneToMany(() => ClosedContentEntity, (closedContent: ClosedContentEntity) => closedContent.content)
+    closedContent: ContentEntity[];
 };

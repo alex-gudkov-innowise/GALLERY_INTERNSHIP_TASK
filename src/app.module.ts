@@ -10,6 +10,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'path';
 import { ContentModule } from './content/content.module';
 import { FilesModule } from './files/files.module';
+import { ClosedContentEntity } from './content/closed-content.entity';
 
 @Module({
     controllers: [],
@@ -28,7 +29,7 @@ import { FilesModule } from './files/files.module';
             username: process.env.POSTGRES_USERNAME,
             password: process.env.POSTGRES_PASSWORD,
             database: process.env.POSTGRES_DATABASE,
-            entities: [UsersEntity, RefreshTokensEntity, ContentEntity],
+            entities: [UsersEntity, RefreshTokensEntity, ContentEntity, ClosedContentEntity],
             synchronize: true, // remove soon...
         }),
         UsersModule,

@@ -25,6 +25,19 @@ export class ContentController
     }
 
     @UseGuards(AuthGuard)
+    @Patch(':contentId/hide/:userId')
+    CloseContent(
+        @Req() request: any,
+        @Param('contentId') contentId: number,
+        @Param('userId') userId: number,
+    )
+    {
+        const myUserId: number = request.user.id; // used to check that content belongs to my user 
+
+        return this.contentService.CloseContent(contentId, myUserId, userId);
+    }
+
+    @UseGuards(AuthGuard)
     @Post('create')
     @UseInterceptors(FileInterceptor('contentFile')) // string that specifies the field name from the form that holds a file
     CreateContent(

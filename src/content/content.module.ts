@@ -8,12 +8,13 @@ import { UsersModule } from 'src/users/users.module';
 import { forwardRef } from '@nestjs/common/utils';
 import { ContentService } from './content.service';
 import { FilesModule } from 'src/files/files.module';
+import { ClosedContentEntity } from './closed-content.entity';
 
 @Module({
     controllers: [ContentController],
     providers: [ContentService],
     imports: [
-        TypeOrmModule.forFeature([UsersEntity, ContentEntity]),
+        TypeOrmModule.forFeature([UsersEntity, ContentEntity, ClosedContentEntity]),
         AuthModule,
         forwardRef(() => UsersModule),
         FilesModule,

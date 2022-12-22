@@ -1,4 +1,5 @@
 import { RefreshTokensEntity } from 'src/auth/refresh-tokens.entity';
+import { ClosedContentEntity } from 'src/content/closed-content.entity';
 import { ContentEntity } from 'src/content/content.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
@@ -17,9 +18,6 @@ export class UsersEntity
     @Column({ default: false })
     isAdmin: boolean;
 
-    // @Column()
-    // hiddenFrom: string;
-
     // one user can have many refresh tokens
     @OneToMany(() => RefreshTokensEntity, (refreshToken) => refreshToken.refreshToken)
     refreshTokens: RefreshTokensEntity[];
@@ -27,4 +25,8 @@ export class UsersEntity
     // one user can have many images/videos
     @OneToMany(() => ContentEntity, (content) => content.id)
     content: ContentEntity[];
+
+    // 
+    @OneToMany(() => ClosedContentEntity, (closedContent: ClosedContentEntity) => closedContent.user)
+    closedContent: ContentEntity[];
 };
