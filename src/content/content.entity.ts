@@ -8,9 +8,6 @@ export class ContentEntity
     id: number;
 
     @Column()
-    filePath: string;
-
-    @Column()
     fileName: string;
 
     @Column()

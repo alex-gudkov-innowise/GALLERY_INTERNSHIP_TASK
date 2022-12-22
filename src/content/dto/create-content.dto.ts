@@ -1,4 +1,4 @@
-export class PostContentDTO
+export class CreateContentDTO
 {
     readonly description: string;
 };

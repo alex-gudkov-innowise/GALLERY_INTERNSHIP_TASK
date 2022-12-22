@@ -31,7 +31,6 @@ export class UsersController
     )
     {
         const myId = req.user.id;
-        console.log(myId);
         
         return this.contentService.GetUserVideos(id);
     }

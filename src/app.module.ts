@@ -9,13 +9,14 @@ import { ContentEntity } from './content/content.entity';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import * as path from 'path';
 import { ContentModule } from './content/content.module';
+import { FilesModule } from './files/files.module';
 
 @Module({
     controllers: [],
     providers: [],
     imports: [
         ServeStaticModule.forRoot({
-            rootPath: path.join(__dirname, 'content', 'image'),
+            rootPath: path.join(__dirname, 'content', 'image'), // serve images as static
         }),
         ConfigModule.forRoot({
             envFilePath: `./.${process.env.NODE_ENV}.env`
@@ -28,11 +29,12 @@ import { ContentModule } from './content/content.module';
             password: process.env.POSTGRES_PASSWORD,
             database: process.env.POSTGRES_DATABASE,
             entities: [UsersEntity, RefreshTokensEntity, ContentEntity],
-            synchronize: true,
+            synchronize: true, // remove soon...
         }),
         UsersModule,
         AuthModule,
         ContentModule,
+        FilesModule,
     ]
 })
 export class AppModule {};
