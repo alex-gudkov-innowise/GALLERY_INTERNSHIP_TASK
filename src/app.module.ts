@@ -11,6 +11,9 @@ import * as path from 'path';
 import { ContentModule } from './content/content.module';
 import { FilesModule } from './files/files.module';
 import { ClosedContentEntity } from './content/closed-content.entity';
+import { RolesModule } from './roles/roles.module';
+import { RolesEntity } from './roles/roles.entity';
+import { UsersRolesEntity } from './roles/users-roles.entity';
 
 @Module({
     controllers: [],
@@ -29,13 +32,22 @@ import { ClosedContentEntity } from './content/closed-content.entity';
             username: process.env.POSTGRES_USERNAME,
             password: process.env.POSTGRES_PASSWORD,
             database: process.env.POSTGRES_DATABASE,
-            entities: [UsersEntity, RefreshTokensEntity, ContentEntity, ClosedContentEntity],
+            entities: [
+                UsersEntity,
+                RefreshTokensEntity,
+                ContentEntity,
+                ClosedContentEntity,
+                RolesEntity,
+                UsersRolesEntity,
+            ],
             synchronize: true, // remove soon...
         }),
         UsersModule,
         AuthModule,
         ContentModule,
         FilesModule,
+        RolesModule,
+        UsersRolesEntity,
     ]
 })
 export class AppModule {};

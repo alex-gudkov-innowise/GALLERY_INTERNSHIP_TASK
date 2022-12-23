@@ -1,7 +1,8 @@
 import { RefreshTokensEntity } from 'src/auth/refresh-tokens.entity';
 import { ClosedContentEntity } from 'src/content/closed-content.entity';
 import { ContentEntity } from 'src/content/content.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { UsersRolesEntity } from 'src/roles/users-roles.entity';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, OneToOne } from 'typeorm';
 
 @Entity({name: 'users'})
 export class UsersEntity
@@ -26,7 +27,11 @@ export class UsersEntity
     @OneToMany(() => ContentEntity, (content) => content.id)
     content: ContentEntity[];
 
-    // 
+    // one user can have no access to many content 
     @OneToMany(() => ClosedContentEntity, (closedContent: ClosedContentEntity) => closedContent.user)
     closedContent: ContentEntity[];
+
+    // one user can have many roles
+    @OneToMany(() => UsersRolesEntity, (userRole: UsersRolesEntity) => userRole.user)
+    userRoles: UsersRolesEntity[];
 };

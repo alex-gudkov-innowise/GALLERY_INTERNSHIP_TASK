@@ -3,11 +3,9 @@ import { ContentEntity } from '../content/content.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UsersService } from 'src/users/users.service';
-import { EditContentDTO } from './dto/edit-content.dto';
 import { CreateContentDTO } from './dto/create-content.dto';
 import { FilesService } from 'src/files/files.service';
 import { ClosedContentEntity } from './closed-content.entity';
-import { async } from 'rxjs';
 
 @Injectable()
 export class ContentService
@@ -80,7 +78,17 @@ export class ContentService
             throw new HttpException('specified user not registered', HttpStatus.NOT_FOUND);   
         }
 
-        // add new record to database
+        // check if this record already exists
+        const candidateClosedContent = await this.closedContentRepository.findOneBy({
+            content: content,
+            user: user
+        });
+        if (!candidateClosedContent)
+        {
+            return candidateClosedContent;
+        }
+        
+        // otherwise add this record to database
         const closedContent = this.closedContentRepository.create({
             content: content,
             user: user,
