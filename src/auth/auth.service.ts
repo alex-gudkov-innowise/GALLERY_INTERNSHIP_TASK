@@ -47,8 +47,8 @@ export class AuthService
 
         // now we can create user
         const user = await this.usersService.CreateUser({
-            email: dto.email,
-            password: hashedPassword
+            ...dto,
+            password: hashedPassword, // replace password with hashed password
         });
 
         // return generated tokens

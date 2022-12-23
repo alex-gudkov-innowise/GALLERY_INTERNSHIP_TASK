@@ -2,7 +2,7 @@ import { RefreshTokensEntity } from 'src/auth/refresh-tokens.entity';
 import { ClosedContentEntity } from 'src/content/closed-content.entity';
 import { ContentEntity } from 'src/content/content.entity';
 import { UsersRolesEntity } from 'src/roles/users-roles.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, OneToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 @Entity({name: 'users'})
 export class UsersEntity
@@ -16,8 +16,11 @@ export class UsersEntity
     @Column({ nullable: false })
     password: string;
 
-    @Column({ default: false })
-    isAdmin: boolean;
+    @Column()
+    name: string;
+
+    @Column()
+    bio: string;
 
     // one user can have many refresh tokens
     @OneToMany(() => RefreshTokensEntity, (refreshToken) => refreshToken.refreshToken)

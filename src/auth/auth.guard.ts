@@ -5,41 +5,45 @@ import { Observable } from 'rxjs';
 @Injectable()
 export class AuthGuard implements CanActivate
 {
-    constructor(private readonly jwtService: JwtService) {}
+    constructor(
+        private readonly jwtService: JwtService,
+    ) {}
 
     // the endpoint can be reached if canActivate() returns true
-    canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean>
+    canActivate(context: ExecutionContext): boolean
     {
         // get the request object from the context
         const request = context.switchToHttp().getRequest();
 
         // get the authorization header
         const authHeader = request.headers.authorization;
-
-        // the header consists of 2 parts
+        if (!authHeader)
+        {
+            throw new HttpException('empty authorization header', HttpStatus.UNAUTHORIZED);
+        }
         const tokenType = authHeader.split(' ')[0]; // token type
-        const accessToken = authHeader.split(' ')[1]; // the access token itself
+        const tokenValue = authHeader.split(' ')[1]; // token value
 
         // check token type and its availability
-        if (tokenType !== 'Bearer' || !accessToken)
+        if (tokenType !== 'Bearer' || !tokenValue)
         {
-            throw new UnauthorizedException({ message: 'token error' });
+            throw new HttpException('bearer token error', HttpStatus.UNAUTHORIZED);
         }
 
+        // verify() throws exception if the token not verified (expired or invalid)
+        // otherwise it returns the decoded token
         try
         {
-            // verify() throws exception if the token is expired
-            // otherwise it returns the decoded token
-            const user = this.jwtService.verify(accessToken, {
+            const user = this.jwtService.verify(tokenValue, {
                 secret: process.env.ACCESS_TOKEN_SECRET
             });
-            request.user = user;
+            request.user = user; // put user in request object for further using
             
             return true;
         }
         catch (error)
         {
-            throw new HttpException('the user is not authorized or access token is expired', HttpStatus.FORBIDDEN);
+            throw new HttpException('access token expired or invalid', HttpStatus.FORBIDDEN);
         }
     }
 };

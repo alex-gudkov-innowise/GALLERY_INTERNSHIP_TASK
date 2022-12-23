@@ -83,9 +83,9 @@ export class ContentService
             content: content,
             user: user
         });
-        if (!candidateClosedContent)
+        if (candidateClosedContent)
         {
-            return candidateClosedContent;
+            return { message: 'one content closed for one user' };
         }
         
         // otherwise add this record to database
@@ -93,7 +93,9 @@ export class ContentService
             content: content,
             user: user,
         });
-        return await this.closedContentRepository.save(closedContent);
+        await this.closedContentRepository.save(closedContent);
+
+        return { message: 'one content closed for one user' };
     }
 
     async CloseAllContentForOneUser(myUserId: number, userId: number)

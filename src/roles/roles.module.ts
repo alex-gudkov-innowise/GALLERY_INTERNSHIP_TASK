@@ -6,6 +6,7 @@ import { RolesEntity } from './roles.entity';
 import { UsersEntity } from 'src/users/users.entity';
 import { UsersRolesEntity } from './users-roles.entity';
 import { UsersModule } from 'src/users/users.module';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
     controllers: [RolesController],
@@ -13,9 +14,11 @@ import { UsersModule } from 'src/users/users.module';
     imports: [
         TypeOrmModule.forFeature([RolesEntity, UsersEntity, UsersRolesEntity]),
         forwardRef(() => UsersModule),
+        JwtModule.register({}), // register the module 
     ],
     exports: [
-        RolesService
+        RolesService,
+        JwtModule
     ]
 })
 export class RolesModule {};

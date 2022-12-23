@@ -42,11 +42,11 @@ import { UsersRolesEntity } from './roles/users-roles.entity';
             ],
             synchronize: true, // remove soon...
         }),
+        RolesModule,
         UsersModule,
         AuthModule,
         ContentModule,
         FilesModule,
-        RolesModule,
         UsersRolesEntity,
     ]
 })

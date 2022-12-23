@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpCode, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateRoleDTO } from './dto/create-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -6,14 +6,34 @@ import { RolesEntity } from './roles.entity';
 import { UsersEntity } from 'src/users/users.entity';
 import { UsersRolesEntity } from './users-roles.entity';
 import { threadId } from 'worker_threads';
+import { async } from 'rxjs';
+import process from 'process';
 
 @Injectable()
 export class RolesService 
 {
     constructor(
         @InjectRepository(RolesEntity) private readonly rolesRepository: Repository<RolesEntity>,
+        @InjectRepository(UsersEntity) private readonly usersRepository: Repository<UsersEntity>,
         @InjectRepository(UsersRolesEntity) private readonly usersRolesRepository: Repository<UsersRolesEntity>,
-    ) {}
+    ){
+        this.CheckBasicRoles(); // check the availability of basic roles (USER, ADMIN)
+    }
+
+    async CheckBasicRoles()
+    {
+        // add basic roles to database if they not exist
+        const roleUSER = await this.GetRoleByName('USER');
+        if (!roleUSER)
+        {
+            await this.CreateRole({ name: 'USER', description: 'internal user' });
+        }
+        const roleADMIN = await this.GetRoleByName('ADMIN');
+        if (!roleADMIN)
+        {
+            await this.CreateRole({ name: 'ADMIN', description: 'powerful admin' });
+        }
+    }
 
     async GetRoleByName(roleName: string): Promise<RolesEntity>
     {
@@ -21,8 +41,29 @@ export class RolesService
         return role;
     }
 
+    async AssignRoleToUser(roleName: string, userId: number): Promise<UsersRolesEntity>
+    {
+        const role = await this.rolesRepository.findOneBy({ name: roleName });
+        const user = await this.usersRepository.findOneBy({ id: userId });
+        const userRole = await this.ConnectUserWithRole(user, role);
+        return userRole;
+    }
+    
+    async GetAllRoles(): Promise<RolesEntity[]>  
+    {
+        const roles = await this.rolesRepository.find();
+        return roles;
+    }
+   
     async CreateRole(dto: CreateRoleDTO): Promise<RolesEntity>
     {
+        // check of this role already exists
+        const candidateRole = await this.rolesRepository.findOneBy({ name: dto.name });
+        if (candidateRole)
+        {
+            throw new HttpException('role already exists', HttpStatus.CONFLICT);   
+        }
+
         const role = this.rolesRepository.create({
             name: dto.name,
             description: dto.description,
@@ -31,14 +72,35 @@ export class RolesService
         return role;
     }
 
-    async ConnectUserWithRole(user: UsersEntity, role: RolesEntity)
+    async ConnectUserWithRole(user: UsersEntity, role: RolesEntity): Promise<UsersRolesEntity>
     {
-        // create new user-role connection
+        if (!user || !role)
+        {
+            throw new HttpException('failed to create relationship', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        // create new user-role relationship
         const userRole = this.usersRolesRepository.create({
             user: user,
             role: role
         });
         await this.usersRolesRepository.save(userRole);
         return userRole;
+    }
+
+    async GetUserRolesByUserId(userId: number): Promise<{ roleName: string }[]>
+    {
+        const userRoles = await this.usersRolesRepository.query(`
+            SELECT users_roles."roleName"
+            FROM users_roles
+            WHERE users_roles."userId" = $1
+        `, [userId]);
+        return userRoles;
+    }
+
+    async isUserAdmin(userId: number): Promise<boolean>
+    {
+        const userRoles = await this.GetUserRolesByUserId(userId);
+        return userRoles.includes({roleName: 'ADMIN' });
     }
 };
