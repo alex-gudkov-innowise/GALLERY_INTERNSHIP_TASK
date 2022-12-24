@@ -8,9 +8,15 @@ export class ClosedContentEntity
     @PrimaryGeneratedColumn()
     id: number;
     
-    @ManyToOne(() => UsersEntity, (user: UsersEntity) => user.id)
+    @ManyToOne(() => UsersEntity, (user: UsersEntity) => user.id, { 
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+    })
     user: UsersEntity;
 
-    @ManyToOne(() => ContentEntity, (content: ContentEntity) => content.id)
+    @ManyToOne(() => ContentEntity, (content: ContentEntity) => content.id, { 
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+    })
     content: ContentEntity;
 };

@@ -38,10 +38,10 @@ export class RolesGuard implements CanActivate
         const userId = request.user.id;
         const userRoles = await this.rolesService.GetUserRolesByUserId(userId);
 
-        // true if some of user roles are in required roles
-        return userRoles.some((userRole: { roleName: string }) =>
+        // return true if one of user roles is included in required roles
+        for (const userRole of userRoles)
         {
-            return requiredRoles.includes(userRole.roleName);
-        });
+            if (requiredRoles.includes(userRole.roleName)) return true;   
+        }
     }
 }

@@ -8,18 +8,19 @@ export class ContentEntity
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
+    @Column({ unique: true, nullable: false })
     fileName: string;
 
-    @Column()
+    @Column({ nullable: false })
     fileExt: string;
 
-    @Column()
+    @Column({ nullable: false })
     type: string;
 
     @Column()
     description: string;
 
+    // 
     @ManyToOne(() => UsersEntity, (user: UsersEntity) => user.id)
     user: UsersEntity;
 

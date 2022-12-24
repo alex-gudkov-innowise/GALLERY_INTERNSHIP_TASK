@@ -13,22 +13,29 @@ export class UsersService
         @InjectRepository(UsersEntity) private readonly usersRepository: Repository<UsersEntity>,
         private readonly rolesService: RolesService,
     ){
-        this.CheckMainAdmin(); // check the availability of main admin
+        this._CheckMainAdmin(); // check the availability of main admin
     }
 
-    async CheckMainAdmin()
+    private async _CheckMainAdmin()
     {
         // add main admin to database if it not exist
         let mainAdmin: UsersEntity = await this.usersRepository.findOneBy({ email: process.env.MAIN_ADMIN_MAIL });
         if (!mainAdmin)
         {
+            // get admin role
             const adminRole = await this.rolesService.GetRoleByName('ADMIN');
-            mainAdmin = await this.CreateUser({
+            
+            // create admin user
+            const dto: CreateUserDTO = {
                 email: process.env.MAIN_ADMIN_MAIL,
                 password: await hash(process.env.MAIN_ADMIN_PASSWORD, 5),
                 name: process.env.MAIN_ADMIN_NAME,
                 bio: process.env.MAIN_ADMIN_BIO
-            });
+            };
+            mainAdmin = await this.CreateUser(dto);
+            console.log(mainAdmin);
+            
+            // give him admin role 
             await this.rolesService.ConnectUserWithRole(mainAdmin, adminRole);
         }
     }
@@ -55,6 +62,10 @@ export class UsersService
     {
         // get default role (USER) from database
         const role = await this.rolesService.GetRoleByName('USER');
+        if (!role)
+        {
+            throw new HttpException('default role not exists', HttpStatus.BAD_REQUEST);
+        }
 
         // add new user to database
         const user = this.usersRepository.create(dto);
@@ -64,5 +75,14 @@ export class UsersService
         this.rolesService.ConnectUserWithRole(user, role);
         
         return user;
+    }
+
+    async IsUserAdmin(userId: number): Promise<boolean>
+    {
+        const userRoles = await this.rolesService.GetUserRolesByUserId(userId);
+        for (const userRole of userRoles)
+        {
+            if (userRole.roleName === 'ADMIN') return true;   
+        }
     }
 };

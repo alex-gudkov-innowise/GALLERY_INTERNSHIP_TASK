@@ -6,6 +6,7 @@ import { UsersService } from 'src/users/users.service';
 import { CreateContentDTO } from './dto/create-content.dto';
 import { FilesService } from 'src/files/files.service';
 import { ClosedContentEntity } from './closed-content.entity';
+import { EditContentDTO } from './dto/edit-content.dto';
 
 @Injectable()
 export class ContentService
@@ -32,11 +33,50 @@ export class ContentService
         });
         await this.contentRepository.save(content);
 
-        return { fileName: fileInfo.name };
+        return { fileName: content.fileName };
+    }
+    
+    async EditContent(contentId: number, contentFile: Express.Multer.File, dto: EditContentDTO, myUserId: number)
+    {
+        const isMyUserAdmin = await this.usersService.IsUserAdmin(myUserId);
+        const content = await this.contentRepository.findOne({ 
+            where: { id: contentId },
+            relations: { user: true } // include user relation to compare with myUserId
+        });
+
+        // checks
+        if (!content)
+        {
+            throw new HttpException('content not found', HttpStatus.NOT_FOUND);   
+        }
+        if (content.user.id !== myUserId && !isMyUserAdmin) // admin can also close content of users
+        {
+            throw new HttpException('current user has no access to content', HttpStatus.FORBIDDEN);   
+        }
+        
+        // remove old and create new file if content file was attached
+        if (contentFile)
+        {
+            await this.filesService.RemoveFile(content.type, content.fileName);
+            const fileInfo = await this.filesService.CreateFile(contentFile);
+            content.fileName = fileInfo.name;
+            content.fileExt = fileInfo.ext;
+            content.type = fileInfo.type;
+        }
+
+        // update description if description filed was specified
+        if (dto.description)
+        {
+            content.description = dto.description;
+            await this.contentRepository.save(content);
+        }
+
+        return { fileName: content.fileName };
     }
     
     async RemoveContent(contentId: number, myUserId: number)
     {
+        const isMyUserAdmin = await this.usersService.IsUserAdmin(myUserId);
         const content = await this.contentRepository.findOne({ 
             where: { id: contentId },
             relations: { user: true } // include user relation to compare with myUserId
@@ -46,18 +86,23 @@ export class ContentService
         {
             throw new HttpException('content not found', HttpStatus.NOT_FOUND);   
         }
-        if (content.user.id !== myUserId)
+        if (content.user.id !== myUserId && !isMyUserAdmin) // admin can also remove content of users
         {
             throw new HttpException('user has no access to content', HttpStatus.FORBIDDEN);   
         }
 
+        // remove content file
+        await this.filesService.RemoveFile(content.type, content.fileName);
+
         // delete record from database
-        return await this.contentRepository.delete({ id: contentId });
+        await this.contentRepository.delete(content);
+
+        return { message: 'content removed' };
     }
 
     async CloseOneContentForOneUser(contentId: number, myUserId: number, userId: number)
     {
-        // get entities from database
+        const isMyUserAdmin = await this.usersService.IsUserAdmin(myUserId);
         const content = await this.contentRepository.findOne({ 
             where: { id: contentId },
             relations: { user: true } // include user relation to compare with myUserId
@@ -69,7 +114,7 @@ export class ContentService
         {
             throw new HttpException('content not found', HttpStatus.NOT_FOUND);   
         }
-        if (content.user.id !== myUserId)
+        if (content.user.id !== myUserId && !isMyUserAdmin) // admin can also close content of users
         {
             throw new HttpException('current user has no access to content', HttpStatus.FORBIDDEN);   
         }
@@ -98,7 +143,7 @@ export class ContentService
         return { message: 'one content closed for one user' };
     }
 
-    async CloseAllContentForOneUser(myUserId: number, userId: number)
+    async CloseAllMyContentForOneUser(myUserId: number, userId: number)
     {
         const user = await this.usersService.GetUserById(userId);
         if (!user)
@@ -106,7 +151,7 @@ export class ContentService
             throw new HttpException('specified user not registered', HttpStatus.NOT_FOUND);   
         }
 
-        return await this.contentRepository.query(`
+        await this.closedContentRepository.query(`
             INSERT INTO closed_content("userId", "contentId")
             (
                 SELECT $1 AS id_user, content.id AS id_content
@@ -116,11 +161,13 @@ export class ContentService
                 SELECT closed_content."userId", closed_content."contentId" FROM closed_content
             );
         `, [userId, myUserId]);
+
+        return { message: 'all content closed for one user' };
     }
     
-    async CloseAllContentForAllUsers(myUserId: number)
+    async CloseAllMyContentForAllUsers(myUserId: number)
     {
-        return await this.contentRepository.query(`
+        await this.closedContentRepository.query(`
             INSERT INTO closed_content("userId", "contentId")
             (
                 SELECT users.id AS id_user, content.id AS id_content
@@ -130,34 +177,62 @@ export class ContentService
                 SELECT closed_content."userId", closed_content."contentId" FROM closed_content
             );
         `, [myUserId]);
+
+        return { message: 'all content closed for all users' };
     }
 
     async GetUserVideos(userId: number, myUserId: number)
     {
+        const isMyUserAdmin = await this.usersService.IsUserAdmin(myUserId);
+        let contentVideos: ContentEntity[];
+
         // select all videos available for myUser
-        const videoContent = await this.contentRepository.query(`
+        if (isMyUserAdmin)
+        {
+            contentVideos = await this.contentRepository.query(`
+                SELECT * FROM content
+                WHERE content."userId" = $1 AND content.type = 'video';
+            `, [userId]);
+        }
+        else
+        {
+            contentVideos = await this.contentRepository.query(`
             SELECT * FROM content
             WHERE content."userId" = $1 AND content.type = 'video' AND content.id NOT IN (
                 SELECT closed_content."contentId" FROM closed_content
                 WHERE closed_content."userId" = $2
             );
-        `, [userId, myUserId]);
+            `, [userId, myUserId]);
+        }
 
-        return videoContent;
+        return contentVideos;
     }
     
-    async GetUserImages(userId: number, myUserId: number)
+    async GetUserImages(userId: number, myUserId: number): Promise<ContentEntity[]>
     {
+        const isMyUserAdmin = await this.usersService.IsUserAdmin(myUserId);
+        let contentImages: ContentEntity[];
+
         // select all videos available for myUser
-        const videoContent = await this.contentRepository.query(`
+        if (isMyUserAdmin)
+        {
+            contentImages = await this.contentRepository.query(`
+                SELECT * FROM content
+                WHERE content."userId" = $1 AND content.type = 'image';
+            `, [userId]);
+        }
+        else
+        {
+            contentImages = await this.contentRepository.query(`
             SELECT * FROM content
             WHERE content."userId" = $1 AND content.type = 'image' AND content.id NOT IN (
                 SELECT closed_content."contentId" FROM closed_content
                 WHERE closed_content."userId" = $2
             );
-        `, [userId, myUserId]);
+            `, [userId, myUserId]);
+        }
 
-        return videoContent;
+        return contentImages;
     }
 
     async LoadVideo(fileName: string, request: any, response: any)

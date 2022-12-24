@@ -6,6 +6,19 @@ import * as fs from 'fs';
 @Injectable()
 export class FilesService
 {
+    async RemoveFile(fileType: string, fileName: string)
+    {
+        try
+        {
+            const fileUrl = path.join(__dirname, '..', 'content', fileType, fileName);
+            await fs.promises.rm(fileUrl);
+        }
+        catch (error)
+        {
+            throw new HttpException('file remove error', HttpStatus.INTERNAL_SERVER_ERROR);   
+        }
+    }
+
     async CreateFile(file: Express.Multer.File): Promise<{ name: string, ext: string, type: string }>
     {
         // check the valid loaded file

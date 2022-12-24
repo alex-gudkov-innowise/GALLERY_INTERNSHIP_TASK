@@ -17,19 +17,19 @@ export class RolesService
         @InjectRepository(UsersEntity) private readonly usersRepository: Repository<UsersEntity>,
         @InjectRepository(UsersRolesEntity) private readonly usersRolesRepository: Repository<UsersRolesEntity>,
     ){
-        this.CheckBasicRoles(); // check the availability of basic roles (USER, ADMIN)
+        this._CheckBasicRoles(); // check the availability of basic roles (USER, ADMIN)
     }
 
-    async CheckBasicRoles()
+    private async _CheckBasicRoles()
     {
         // add basic roles to database if they not exist
-        const roleUSER = await this.GetRoleByName('USER');
-        if (!roleUSER)
+        const roleUser = await this.GetRoleByName('USER');
+        if (!roleUser)
         {
             await this.CreateRole({ name: 'USER', description: 'internal user' });
         }
-        const roleADMIN = await this.GetRoleByName('ADMIN');
-        if (!roleADMIN)
+        const roleAdmin = await this.GetRoleByName('ADMIN');
+        if (!roleAdmin)
         {
             await this.CreateRole({ name: 'ADMIN', description: 'powerful admin' });
         }
@@ -76,7 +76,7 @@ export class RolesService
     {
         if (!user || !role)
         {
-            throw new HttpException('failed to create relationship', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException('failed to create user-role relationship', HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         // create new user-role relationship
@@ -85,6 +85,7 @@ export class RolesService
             role: role
         });
         await this.usersRolesRepository.save(userRole);
+        
         return userRole;
     }
 
@@ -96,11 +97,5 @@ export class RolesService
             WHERE users_roles."userId" = $1
         `, [userId]);
         return userRoles;
-    }
-
-    async isUserAdmin(userId: number): Promise<boolean>
-    {
-        const userRoles = await this.GetUserRolesByUserId(userId);
-        return userRoles.includes({roleName: 'ADMIN' });
     }
 };
