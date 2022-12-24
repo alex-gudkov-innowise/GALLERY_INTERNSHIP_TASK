@@ -36,6 +36,18 @@ export class ContentController
     }
 
     @UseGuards(AuthGuard)
+    @Post(':contentId/open/:userId') // open a specific image/video for a specific user
+    OpenOneContentForOneUser(
+        @Req() request: any,
+        @Param('contentId') contentId: number,
+        @Param('userId') userId: number
+    ){
+        const myUserId: number = request.user.id;
+
+        return this.contentService.OpenOneContentForOneUser(contentId, myUserId, userId);
+    }
+
+    @UseGuards(AuthGuard)
     @Post('close/:userId') // close all my images/videos for a specific user
     CloseAllMyContentForOneUser(
         @Req() request: any,
@@ -46,16 +58,6 @@ export class ContentController
         return this.contentService.CloseAllMyContentForOneUser(myUserId, userId);
     }
     
-    @UseGuards(AuthGuard)
-    @Post('close') // close all my images/videos for all users
-    CloseAllMyContentForAllUsers(
-        @Req() request: any
-    ){
-        const myUserId: number = request.user.id;
-
-        return this.contentService.CloseAllMyContentForAllUsers(myUserId);
-    }
-
     @UseGuards(AuthGuard)
     @Post('create')
     @UseInterceptors(FileInterceptor('contentFile')) // string that specifies the field name from the form that holds a file

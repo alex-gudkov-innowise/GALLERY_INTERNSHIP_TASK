@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ContentService } from 'src/content/content.service';
@@ -39,10 +39,22 @@ export class UsersController
     }
     
     @UseGuards(AuthGuard)
-    @Get(':id')
+    @Get(':userId')
     GetUserById(
-        @Param('id') id: number
+        @Param('userId') userId: number,
     ){
-        return this.usersService.GetUserById(id);
+        return this.usersService.GetUserById(userId);
     }
+    
+    @UseGuards(AuthGuard)
+    @Patch(':userId/close') // close user gallery for all users
+    CloseUserGallery(
+        @Param('userId') userId: number,
+        @Req() request: any,
+    ){
+        const myUserId: number = request.user.id;
+
+        return this.usersService.CloseUserGallery(userId, myUserId);
+    }
+
 };

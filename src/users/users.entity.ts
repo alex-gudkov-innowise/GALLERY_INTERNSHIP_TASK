@@ -19,8 +19,11 @@ export class UsersEntity
     @Column({ nullable: false })
     name: string;
 
-    @Column()
+    @Column({ default: '' })
     bio: string;
+
+    @Column({ default: false })
+    isClosedGallery: boolean;
 
     // one user can have many refresh tokens
     @OneToMany(() => RefreshTokensEntity, (refreshToken) => refreshToken.refreshToken)

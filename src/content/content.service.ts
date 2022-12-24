@@ -49,7 +49,7 @@ export class ContentService
         {
             throw new HttpException('content not found', HttpStatus.NOT_FOUND);   
         }
-        if (content.user.id !== myUserId && !isMyUserAdmin) // admin can also close content of users
+        if (content.user.id != myUserId && !isMyUserAdmin) // admin can also close content of users
         {
             throw new HttpException('current user has no access to content', HttpStatus.FORBIDDEN);   
         }
@@ -86,7 +86,7 @@ export class ContentService
         {
             throw new HttpException('content not found', HttpStatus.NOT_FOUND);   
         }
-        if (content.user.id !== myUserId && !isMyUserAdmin) // admin can also remove content of users
+        if (content.user.id != myUserId && !isMyUserAdmin) // admin can also remove content of users
         {
             throw new HttpException('user has no access to content', HttpStatus.FORBIDDEN);   
         }
@@ -98,6 +98,38 @@ export class ContentService
         await this.contentRepository.delete(content);
 
         return { message: 'content removed' };
+    }
+
+    async OpenOneContentForOneUser(contentId: number, myUserId: number, userId: number)
+    {
+        const isMyUserAdmin = await this.usersService.IsUserAdmin(myUserId);
+        const content = await this.contentRepository.findOne({ 
+            where: { id: contentId },
+            relations: { user: true } // include user relation to compare with myUserId
+        });
+        const user = await this.usersService.GetUserById(userId);
+
+        // checks
+        if (!content)
+        {
+            throw new HttpException('content not found', HttpStatus.NOT_FOUND);   
+        }
+        if (content.user.id != myUserId && !isMyUserAdmin) // admin can also close content of users
+        {
+            throw new HttpException('current user has no access to content', HttpStatus.FORBIDDEN);   
+        }
+        if (!user)
+        {
+            throw new HttpException('specified user not registered', HttpStatus.NOT_FOUND);   
+        }
+
+        // remove record from database = unclose content
+        const closedContent = await this.closedContentRepository.findOne({
+            where: { user: user, content: content }
+        });
+        this.closedContentRepository.delete(closedContent);
+
+        return { message: 'one content opened for one user' };
     }
 
     async CloseOneContentForOneUser(contentId: number, myUserId: number, userId: number)
@@ -114,7 +146,7 @@ export class ContentService
         {
             throw new HttpException('content not found', HttpStatus.NOT_FOUND);   
         }
-        if (content.user.id !== myUserId && !isMyUserAdmin) // admin can also close content of users
+        if (content.user.id != myUserId && !isMyUserAdmin) // admin can also close content of users
         {
             throw new HttpException('current user has no access to content', HttpStatus.FORBIDDEN);   
         }
@@ -165,26 +197,17 @@ export class ContentService
         return { message: 'all content closed for one user' };
     }
     
-    async CloseAllMyContentForAllUsers(myUserId: number)
-    {
-        await this.closedContentRepository.query(`
-            INSERT INTO closed_content("userId", "contentId")
-            (
-                SELECT users.id AS id_user, content.id AS id_content
-                FROM content, users
-                WHERE content."userId" = $1 AND users.id != $1
-                EXCEPT
-                SELECT closed_content."userId", closed_content."contentId" FROM closed_content
-            );
-        `, [myUserId]);
-
-        return { message: 'all content closed for all users' };
-    }
-
     async GetUserVideos(userId: number, myUserId: number)
     {
+        // check that user registered
+        const user = await this.usersService.GetUserById(userId);
+        if (!user)
+        {
+            throw new HttpException('user not registered', HttpStatus.NOT_FOUND);   
+        }
+        
         const isMyUserAdmin = await this.usersService.IsUserAdmin(myUserId);
-        let contentVideos: ContentEntity[];
+        let contentVideos: ContentEntity[] = [];
 
         // select all videos available for myUser
         if (isMyUserAdmin)
@@ -194,7 +217,7 @@ export class ContentService
                 WHERE content."userId" = $1 AND content.type = 'video';
             `, [userId]);
         }
-        else
+        else if (!user.isClosedGallery)
         {
             contentVideos = await this.contentRepository.query(`
             SELECT * FROM content
@@ -210,8 +233,15 @@ export class ContentService
     
     async GetUserImages(userId: number, myUserId: number): Promise<ContentEntity[]>
     {
+        // check that user registered
+        const user = await this.usersService.GetUserById(userId);
+        if (!user)
+        {
+            throw new HttpException('user not registered', HttpStatus.NOT_FOUND);   
+        }
+
         const isMyUserAdmin = await this.usersService.IsUserAdmin(myUserId);
-        let contentImages: ContentEntity[];
+        let contentImages: ContentEntity[] = [];
 
         // select all videos available for myUser
         if (isMyUserAdmin)
@@ -221,7 +251,7 @@ export class ContentService
                 WHERE content."userId" = $1 AND content.type = 'image';
             `, [userId]);
         }
-        else
+        else if (!user.isClosedGallery)
         {
             contentImages = await this.contentRepository.query(`
             SELECT * FROM content

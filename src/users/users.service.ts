@@ -30,7 +30,6 @@ export class UsersService
                 email: process.env.MAIN_ADMIN_MAIL,
                 password: await hash(process.env.MAIN_ADMIN_PASSWORD, 5),
                 name: process.env.MAIN_ADMIN_NAME,
-                bio: process.env.MAIN_ADMIN_BIO
             };
             mainAdmin = await this.CreateUser(dto);
             console.log(mainAdmin);
@@ -52,10 +51,16 @@ export class UsersService
         return user;
     }
 
-    async GetUserByEmail(email: string): Promise<UsersEntity>
+    async GetUserByEmail(userEmail: string): Promise<UsersEntity>
     {
-        const user = await this.usersRepository.findOneBy({ email: email });
+        const user = await this.usersRepository.findOneBy({ email: userEmail });
         return user;
+    }
+
+    async GetUsersByName(userName: string): Promise<UsersEntity[]>
+    {
+        const users = await this.usersRepository.findBy({ name: userName }); // many users can have same names
+        return users;
     }
 
     async CreateUser(dto: CreateUserDTO): Promise<UsersEntity>
@@ -84,5 +89,23 @@ export class UsersService
         {
             if (userRole.roleName === 'ADMIN') return true;   
         }
+    }
+
+    async CloseUserGallery(userId: number, myUserId: number)
+    {
+        const isMyUserAdmin = await this.IsUserAdmin(myUserId);
+        
+        // checks
+        if (userId != myUserId && !isMyUserAdmin) // only user can close his gallery (admin can also close users gallery)
+        {
+            throw new HttpException('current user has no access to content', HttpStatus.FORBIDDEN);   
+        }
+        
+        // 
+        const user = await this.GetUserById(userId);
+        user.isClosedGallery = true;
+        await this.usersRepository.save(user);
+
+        return { isClosedGallery: user.isClosedGallery };
     }
 };
