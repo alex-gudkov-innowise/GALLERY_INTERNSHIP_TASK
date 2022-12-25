@@ -43,11 +43,11 @@ import { MailerModule } from '@nestjs-modules/mailer';
         }),
         TypeOrmModule.forRoot({
             type: 'postgres',
-            host: process.env.POSTGRES_HOST,
-            port: Number(process.env.POSTGRES_PORT),
-            username: process.env.POSTGRES_USERNAME,
-            password: process.env.POSTGRES_PASSWORD,
-            database: process.env.POSTGRES_DATABASE,
+            host: process.env.TYPEORM_HOST,
+            port: Number(process.env.TYPEORM_PORT),
+            username: process.env.TYPEORM_USERNAME,
+            password: process.env.TYPEORM_PASSWORD,
+            database: process.env.TYPEORM_DATABASE,
             entities: [
                 UsersEntity,
                 RefreshTokensEntity,
@@ -56,7 +56,9 @@ import { MailerModule } from '@nestjs-modules/mailer';
                 RolesEntity,
                 UsersRolesEntity,
             ],
-            synchronize: true, // remove soon...
+            synchronize: false,
+            migrations: ['./dist/migrations/*.js'],
+            migrationsRun: false,
         }),
         RolesModule,
         UsersModule,
