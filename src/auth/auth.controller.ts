@@ -1,9 +1,10 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, UsePipes } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignUpUserDTO } from './dto/sign-in-user.dto';
-import { SignInUserDTO } from './dto/sign-up-user.dto';
 import { RefreshTokenDTO } from './dto/refresh-token.dto';
 import { AuthGuard } from './auth.guard';
+import { ValidationPipe } from 'src/validation/validation.pipe';
+import { SignUpUserDTO } from './dto/sign-up-user.dto';
+import { SignInUserDTO } from './dto/sign-in-user.dto';
 
 @Controller('auth')
 export class AuthController
@@ -13,6 +14,7 @@ export class AuthController
     ) {}
 
     @Post('/sign-up')
+    @UsePipes(ValidationPipe)
     SignUpUser(@Body() dto: SignUpUserDTO)
     {
         return this.authService.SignUpUser(dto);

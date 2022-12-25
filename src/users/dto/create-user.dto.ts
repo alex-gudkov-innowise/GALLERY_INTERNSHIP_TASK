@@ -1,4 +1,4 @@
-// DTO (Data Transfer Object) — design pattern for data transfer between application subsystems
+// DTO (Data Transfer Object) — design pattern for data transforming between the application subsystems
 export class CreateUserDTO
 {
     readonly email: string;

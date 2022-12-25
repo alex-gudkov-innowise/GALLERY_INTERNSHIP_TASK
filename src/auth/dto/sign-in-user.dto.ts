@@ -1,3 +1,5 @@
-import { CreateUserDTO } from "src/users/dto/create-user.dto";
-
-export class SignUpUserDTO extends CreateUserDTO {};
+export class SignInUserDTO
+{
+    readonly email: string;
+    readonly password: string;
+}

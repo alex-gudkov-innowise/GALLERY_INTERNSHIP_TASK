@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ContentService } from 'src/content/content.service';
@@ -33,17 +33,12 @@ export class UsersController
 
     @UseGuards(AuthGuard)
     @Get()
-    GetAllUsers()
-    {
-        return this.usersService.GetAllUsers();
-    }
-    
-    @UseGuards(AuthGuard)
-    @Get(':userId')
-    GetUserById(
-        @Param('userId') userId: number,
+    GetUser(
+        @Query('id') id: number,
+        @Query('email') email: string,
+        @Query('name') name: string,
     ){
-        return this.usersService.GetUserById(userId);
+        return this.usersService.GetUser(id, email, name);
     }
     
     @UseGuards(AuthGuard)

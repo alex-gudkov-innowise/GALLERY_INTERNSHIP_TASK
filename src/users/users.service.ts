@@ -45,6 +45,26 @@ export class UsersService
         return allUsers;
     }
 
+    async GetUser(id: number, email: string, name: string): Promise<UsersEntity | UsersEntity[]>
+    {
+        // priority: id > email > name
+        if (id)
+        {
+            return this.GetUserById(id);
+        }
+        if (email)
+        {
+            return this.GetUserByEmail(email);
+        }
+        if (name)
+        {
+            return this.GetUsersByName(name);
+        }
+
+        // return all users if query params not specified
+        return this.GetAllUsers();
+    }
+
     async GetUserById(id: number): Promise<UsersEntity>
     {
         const user = await this.usersRepository.findOneBy({ id: id });
