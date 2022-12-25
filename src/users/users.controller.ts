@@ -15,9 +15,9 @@ export class UsersController
     @Get(':id/images')
     GetUserImages(
         @Param('id') id: number,
-        @Req() req: any
+        @Req() request: any
     ){
-        const myUserId = req.user.id;
+        const myUserId = request.userId;
         return this.contentService.GetUserImages(id, myUserId);
     }
 
@@ -25,9 +25,9 @@ export class UsersController
     @Get(':id/videos')
     GetUserVideos(
         @Param('id') id: number,
-        @Req() req: any
+        @Req() request: any
     ){
-        const myUserId = req.user.id;
+        const myUserId = request.userId;
         return this.contentService.GetUserVideos(id, myUserId);
     }
 
@@ -47,7 +47,7 @@ export class UsersController
         @Param('userId') userId: number,
         @Req() request: any,
     ){
-        const myUserId: number = request.user.id;
+        const myUserId: number = request.userId;
 
         return this.usersService.CloseUserGallery(userId, myUserId);
     }

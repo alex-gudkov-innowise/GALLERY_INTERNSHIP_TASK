@@ -28,14 +28,13 @@ export class RolesGuard implements CanActivate
 
         // get user from request after AuthGuard
         const request = context.switchToHttp().getRequest();
-        const requestUser = request.user;
-        if (!requestUser)
+        const userId = request.userId;
+        if (!userId)
         {
             throw new HttpException('user not authorized', HttpStatus.FORBIDDEN);
         }
 
         // get list of user roles
-        const userId = request.user.id;
         const userRoles = await this.rolesService.GetUserRolesByUserId(userId);
 
         // return true if one of user roles is included in required roles

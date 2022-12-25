@@ -11,6 +11,7 @@ import { Repository } from 'typeorm';
 import { RefreshTokenDTO } from './dto/refresh-token.dto';
 import { SignInUserDTO } from './dto/sign-in-user.dto';
 import { SignUpUserDTO } from './dto/sign-up-user.dto';
+import { MailerService } from '@nestjs-modules/mailer/dist';
 
 @Injectable()
 export class AuthService
@@ -19,6 +20,7 @@ export class AuthService
         @InjectRepository(RefreshTokensEntity) private readonly refreshTokensRepository: Repository<RefreshTokensEntity>,
         private readonly usersService: UsersService,
         private readonly jwtService: JwtService,
+        private readonly mailerService: MailerService,
     ) {}
 
     async SignInUser(dto: SignInUserDTO)
@@ -39,25 +41,85 @@ export class AuthService
         const candidateUser = await this.usersService.GetUserByEmail(dto.email);
         if (candidateUser)
         {
-            throw new HttpException('this user already exists', HttpStatus.BAD_REQUEST);
+            throw new HttpException('user already exists', HttpStatus.BAD_REQUEST);
         }
 
-        // password must be stored in hashed form
-        const hashedPassword = await hash(dto.password, 5);
-
-        // now we can create user
+        // create user
+        const hashedPassword = await hash(dto.password, 5); // password must be stored in hashed form
         const user = await this.usersService.CreateUser({
             ...dto,
             password: hashedPassword, // replace password with hashed password
         });
 
+        // create confirmation token
+        const confirmationToken = this._GenerateConfirmationToken(user);
+
+        // send confirmation email
+        this._SendConfirmationEmail(user, confirmationToken);
+
         // return generated tokens
         return {
             accessToken: this._GenerateAccessToken(user),
-            refreshToken: await this._GenerateRefreshToken(user)
+            refreshToken: await this._GenerateRefreshToken(user),
         };
     }
 
+    private async _SendConfirmationEmail(user: UsersEntity, confirmationToken: string)
+    {
+        // send email (transport object was defined in app module)
+        await this.mailerService.sendMail({
+            to: user.email, // list of receivers
+            subject: 'Verify email', // subject line
+            html: `
+                <h1>
+                    Dear ${user.name},
+                </h1>
+                <p style="margin-bottom:32px">
+                    Someone has created an account with this email address. If this was you, click the link below to verify your email address
+                </p>
+                <a style="background:dodgerblue;line-height:24px;text-decoration:none;color:white;font-weight:bold;padding:12px 24px 12px 24px" href="http://localhost:5005/auth/confirm/${confirmationToken}">
+                    CONFIRM EMAIL
+                </a>
+                <br>
+                <br>
+            `, // html body
+        });
+    }
+
+    async ConfirmUserEmail(confirmationToken: string)
+    {
+        try
+        {
+            const userPayload = this.jwtService.verify(confirmationToken, {
+                secret: process.env.CONFIRMATION_TOKEN_SECRET
+            });
+
+            const user = await this.usersService.GetUserById(userPayload.id);
+            await this.usersService.UpdateUser(user, { isConfirmedEmail: true });
+
+            return { isConfirmedEmail: user.isConfirmedEmail };
+        }
+        catch (error)
+        {
+            throw new HttpException('confirmation token expired or invalid', HttpStatus.FORBIDDEN);
+        }
+    }
+
+    private _GenerateConfirmationToken(user: UsersEntity): string
+    {
+        const payload = {
+            id: user.id
+        };
+        
+        const confirmationToken = this.jwtService.sign(payload, {
+            secret: process.env.CONFIRMATION_TOKEN_SECRET,
+            expiresIn: process.env.CONFIRMATION_TOKEN_EXPIRES_IN,
+        });
+
+        return confirmationToken;
+    }
+
+    
     async SignOutUser(dto: RefreshTokenDTO)
     {
         // delete refreshToken from database

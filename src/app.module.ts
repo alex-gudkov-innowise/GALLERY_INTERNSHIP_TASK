@@ -14,16 +14,32 @@ import { ClosedContentEntity } from './content/closed-content.entity';
 import { RolesModule } from './roles/roles.module';
 import { RolesEntity } from './roles/roles.entity';
 import { UsersRolesEntity } from './roles/users-roles.entity';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
     controllers: [],
     providers: [],
     imports: [
-        ServeStaticModule.forRoot({
-            rootPath: path.join(__dirname, 'content', 'image'), // serve images as static
-        }),
         ConfigModule.forRoot({
             envFilePath: `./.${process.env.NODE_ENV}.env`
+        }),
+        MailerModule.forRoot({
+            // create transporter object using the default SMTP transport
+            transport: {
+                host: process.env.MAILER_HOST,
+                port: Number(process.env.MAILER_PORT),
+                secure: Boolean(process.env.MAILER_IS_SECURE), // true for port 465, false for others
+                auth: {
+                    user: process.env.MAILER_USER,
+                    pass: process.env.MAILER_PASS,
+                },
+            },
+            defaults: {
+                from: process.env.MAILER_FROM, // sender address
+            },
+        }),
+        ServeStaticModule.forRoot({
+            rootPath: path.join(__dirname, 'content', 'image'), // serve images as static
         }),
         TypeOrmModule.forRoot({
             type: 'postgres',

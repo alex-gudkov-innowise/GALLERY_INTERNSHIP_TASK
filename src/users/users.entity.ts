@@ -25,6 +25,9 @@ export class UsersEntity
     @Column({ default: false })
     isClosedGallery: boolean;
 
+    @Column({ default: false })
+    isConfirmedEmail: boolean;
+
     // one user can have many refresh tokens
     @OneToMany(() => RefreshTokensEntity, (refreshToken) => refreshToken.refreshToken)
     refreshTokens: RefreshTokensEntity[];

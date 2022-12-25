@@ -1,16 +1,18 @@
 import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
+import { UsersService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate
 {
     constructor(
         private readonly jwtService: JwtService,
+        private readonly usersService: UsersService,
     ) {}
 
     // the endpoint can be reached if canActivate() returns true
-    canActivate(context: ExecutionContext): boolean
+    async canActivate(context: ExecutionContext): Promise<boolean>
     {
         // get the request object from the context
         const request = context.switchToHttp().getRequest();
@@ -30,20 +32,36 @@ export class AuthGuard implements CanActivate
             throw new HttpException('bearer token error', HttpStatus.UNAUTHORIZED);
         }
 
-        // verify() throws exception if the token not verified (expired or invalid)
-        // otherwise it returns the decoded token
         try
         {
-            const user = this.jwtService.verify(tokenValue, {
+            // verify() throws Error() if the token not verified (expired or invalid)
+            // otherwise it returns the decoded token
+            const userPayload = this.jwtService.verify(tokenValue, {
                 secret: process.env.ACCESS_TOKEN_SECRET
             });
-            request.user = user; // put user in request object for further using
+
+            // get the appropriate user
+            const user = await this.usersService.GetUserById(userPayload.id);
+            if (!user)
+            {
+                throw new Error('user not found');
+            }
+            if (!user.isConfirmedEmail)
+            {
+                throw new Error('user email not confirmed');
+            }
+            request.userId = user.id; // put user id in request object for further using
             
             return true;
         }
         catch (error)
         {
-            throw new HttpException('access token expired or invalid', HttpStatus.FORBIDDEN);
+            if (error instanceof Error)
+            {
+                throw new HttpException(error.message, HttpStatus.FORBIDDEN);
+            }
+
+            throw new HttpException('user not authorized', HttpStatus.FORBIDDEN);
         }
     }
 };

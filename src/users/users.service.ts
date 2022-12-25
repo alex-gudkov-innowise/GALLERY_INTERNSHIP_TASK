@@ -5,6 +5,8 @@ import { UsersEntity } from './users.entity';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { RolesService } from 'src/roles/roles.service';
 import { hash } from 'bcryptjs';
+import { UpdateUserDTO } from './dto/update-user.dto';
+import { runInThisContext } from 'vm';
 
 @Injectable()
 export class UsersService
@@ -30,6 +32,7 @@ export class UsersService
                 email: process.env.MAIN_ADMIN_MAIL,
                 password: await hash(process.env.MAIN_ADMIN_PASSWORD, 5),
                 name: process.env.MAIN_ADMIN_NAME,
+                isConfirmedEmail: true,
             };
             mainAdmin = await this.CreateUser(dto);
             console.log(mainAdmin);
@@ -102,6 +105,16 @@ export class UsersService
         return user;
     }
 
+    async UpdateUser(user: UsersEntity, dto: UpdateUserDTO)
+    {
+        // update specified fields of user in database
+        Object.keys(dto).forEach((key: string) =>
+        {
+            user[key] = dto[key];
+        });
+        await this.usersRepository.save(user);
+    }
+
     async IsUserAdmin(userId: number): Promise<boolean>
     {
         const userRoles = await this.rolesService.GetUserRolesByUserId(userId);
@@ -121,10 +134,9 @@ export class UsersService
             throw new HttpException('current user has no access to content', HttpStatus.FORBIDDEN);   
         }
         
-        // 
+        // update user in database
         const user = await this.GetUserById(userId);
-        user.isClosedGallery = true;
-        await this.usersRepository.save(user);
+        await this.UpdateUser(user, { isClosedGallery: true });
 
         return { isClosedGallery: user.isClosedGallery };
     }

@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, UseGuards, UsePipes } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RefreshTokenDTO } from './dto/refresh-token.dto';
 import { AuthGuard } from './auth.guard';
@@ -13,29 +13,40 @@ export class AuthController
         private readonly authService: AuthService,
     ) {}
 
-    @Post('/sign-up')
+    @Post('sign-up')
     @UsePipes(ValidationPipe)
-    SignUpUser(@Body() dto: SignUpUserDTO)
-    {
+    SignUpUser(
+        @Body() dto: SignUpUserDTO,
+    ){
         return this.authService.SignUpUser(dto);
     }
+
+    @Get('confirm/:confirmationToken')
+    ConfirmUserEmail(
+        @Param('confirmationToken') confirmationToken: string,
+    ){
+        return this.authService.ConfirmUserEmail(confirmationToken);
+    }
     
-    @Post('/sign-in')
-    SignInUser(@Body() dto: SignInUserDTO)
-    {
+    @Post('sign-in')
+    SignInUser(
+        @Body() dto: SignInUserDTO,
+    ){
         return this.authService.SignInUser(dto);
     }
 
-    @Post('/new-token')
-    GetNewAccessToken(@Body() dto: RefreshTokenDTO)
-    {
+    @Post('new-token')
+    GetNewAccessToken(
+        @Body() dto: RefreshTokenDTO,
+    ){
         return this.authService.GetNewAccessToken(dto);
     }
 
     @UseGuards(AuthGuard)
-    @Post('/sign-out')
-    SignOutUser(@Body() dto: RefreshTokenDTO)
-    {
+    @Post('sign-out')
+    SignOutUser(
+        @Body() dto: RefreshTokenDTO,
+    ){
         return this.authService.SignOutUser(dto);
     }
 };

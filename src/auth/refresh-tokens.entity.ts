@@ -1,5 +1,5 @@
 import { UsersEntity } from 'src/users/users.entity';
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 
 @Entity({name: 'refresh_tokens'})
 export class RefreshTokensEntity
@@ -7,6 +7,9 @@ export class RefreshTokensEntity
     @PrimaryColumn()
     refreshToken: string;
 
-    @ManyToOne(() => UsersEntity, (user) => user.id)
+    @ManyToOne(() => UsersEntity, (user: UsersEntity) => user.id, { 
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+    })
     user: UsersEntity;
 };

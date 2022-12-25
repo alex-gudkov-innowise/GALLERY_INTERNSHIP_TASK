@@ -18,7 +18,7 @@ export class ContentController
         @Req() request: any,
         @Param('contentId') contentId: number
     ){
-        const myUserId: number = request.user.id;
+        const myUserId: number = request.userId;
 
         return this.contentService.RemoveContent(contentId, myUserId);
     }
@@ -30,7 +30,7 @@ export class ContentController
         @Param('contentId') contentId: number,
         @Param('userId') userId: number
     ){
-        const myUserId: number = request.user.id; // used to check that content belongs to my user 
+        const myUserId: number = request.userId; // used to check that content belongs to my user 
 
         return this.contentService.CloseOneContentForOneUser(contentId, myUserId, userId);
     }
@@ -42,7 +42,7 @@ export class ContentController
         @Param('contentId') contentId: number,
         @Param('userId') userId: number
     ){
-        const myUserId: number = request.user.id;
+        const myUserId: number = request.userId;
 
         return this.contentService.OpenOneContentForOneUser(contentId, myUserId, userId);
     }
@@ -53,7 +53,7 @@ export class ContentController
         @Req() request: any,
         @Param('userId') userId: number
     ){
-        const myUserId: number = request.user.id;
+        const myUserId: number = request.userId;
 
         return this.contentService.CloseAllMyContentForOneUser(myUserId, userId);
     }
@@ -66,7 +66,7 @@ export class ContentController
         @UploadedFile() contentFile: Express.Multer.File, 
         @Req() request: any
     ){
-        const myUserId: number = request.user.id;
+        const myUserId: number = request.userId;
 
         return this.contentService.CreateContent(contentFile, myUserId, dto);
     }
@@ -80,7 +80,7 @@ export class ContentController
         @Body() dto: EditContentDTO,
         @Req() request: any
     ){
-        const myUserId: number = request.user.id;
+        const myUserId: number = request.userId;
 
         return this.contentService.EditContent(contentId, contentFile, dto, myUserId);
     }

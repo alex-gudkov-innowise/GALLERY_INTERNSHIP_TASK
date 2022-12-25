@@ -2,7 +2,7 @@
 /dist
 /node_modules
 
-# Logs
+# logs
 logs
 *.log
 npm-debug.log*
@@ -14,7 +14,7 @@ lerna-debug.log*
 # OS
 .DS_Store
 
-# Tests
+# tests
 /coverage
 /.nyc_output
 
@@ -33,3 +33,6 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# enviroment files
+.env
