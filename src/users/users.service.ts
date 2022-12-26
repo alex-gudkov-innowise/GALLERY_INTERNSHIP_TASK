@@ -35,7 +35,7 @@ export class UsersService
                 isConfirmedEmail: true,
             };
             mainAdmin = await this.CreateUser(dto);
-            console.log(mainAdmin);
+            console.log('Main Admin created:', mainAdmin);
             
             // give him admin role 
             await this.rolesService.ConnectUserWithRole(mainAdmin, adminRole);

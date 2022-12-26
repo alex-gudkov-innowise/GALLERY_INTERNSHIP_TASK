@@ -1,10 +1,7 @@
 import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Observable } from 'rxjs';
-import { UsersService } from 'src/users/users.service';
 import { RolesService } from './roles.service';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './access-roles.decorator';
-import { strict } from 'assert';
 
 @Injectable()
 export class RolesGuard implements CanActivate

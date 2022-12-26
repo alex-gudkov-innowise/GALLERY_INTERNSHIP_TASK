@@ -1,13 +1,10 @@
-import { HttpCode, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateRoleDTO } from './dto/create-role.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RolesEntity } from './roles.entity';
 import { UsersEntity } from 'src/users/users.entity';
 import { UsersRolesEntity } from './users-roles.entity';
-import { threadId } from 'worker_threads';
-import { async } from 'rxjs';
-import process from 'process';
 
 @Injectable()
 export class RolesService 
@@ -27,11 +24,14 @@ export class RolesService
         if (!roleUser)
         {
             await this.CreateRole({ name: 'USER', description: 'internal user' });
+            console.log('USER role created');
+            
         }
         const roleAdmin = await this.GetRoleByName('ADMIN');
         if (!roleAdmin)
         {
             await this.CreateRole({ name: 'ADMIN', description: 'powerful admin' });
+            console.log('ADMIN role created');
         }
     }
 

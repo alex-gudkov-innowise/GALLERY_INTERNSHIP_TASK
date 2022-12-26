@@ -1,6 +1,7 @@
 # compiled output
 /dist
 /node_modules
+/pgdata
 
 # logs
 logs
@@ -36,3 +37,6 @@ lerna-debug.log*
 
 # enviroment files
 .env
+.dev.env
+.prod.env
+
