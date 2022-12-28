@@ -2,95 +2,92 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Req, Res, UploadedFile
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { ContentService } from './content.service';
-import { CreateContentDTO } from './dto/create-content.dto';
-import { EditContentDTO } from './dto/edit-content.dto';
+import { CreateContentDto } from './dto/create-content.dto';
+import { EditContentDto } from './dto/edit-content.dto';
 
-@Controller('content')
-export class ContentController
-{
-    constructor(
-        private readonly contentService: ContentService,
-    ) {}
+@Controller('/content')
+export class ContentController {
+    constructor(private readonly contentService: ContentService) {}
 
     @UseGuards(AuthGuard)
-    @Delete(':contentId/remove')
-    RemoveContent(
+    @Delete('/:contentId/remove')
+    removeContent(
         @Req() request: any,
         @Param('contentId') contentId: number
-    ){
+    ) {
         const myUserId: number = request.userId;
 
-        return this.contentService.RemoveContent(contentId, myUserId);
+        return this.contentService.removeContent(contentId, myUserId);
     }
 
     @UseGuards(AuthGuard)
-    @Post(':contentId/close/:userId') // close a specific image/video for a specific user
-    CloseOneContentForOneUser(
+    @Post('/:contentId/close/:userId') // close a specific image/video for a specific user
+    closeOneContentForOneUser(
         @Req() request: any,
         @Param('contentId') contentId: number,
-        @Param('userId') userId: number
-    ){
-        const myUserId: number = request.userId; // used to check that content belongs to my user 
+        @Param('userId') userId: number,
+    ) {
+        const myUserId: number = request.userId; // used to check that content belongs to my user
 
-        return this.contentService.CloseOneContentForOneUser(contentId, myUserId, userId);
+        return this.contentService.closeOneContentForOneUser(contentId, myUserId, userId);
     }
 
     @UseGuards(AuthGuard)
-    @Post(':contentId/open/:userId') // open a specific image/video for a specific user
-    OpenOneContentForOneUser(
+    @Post('/:contentId/open/:userId') // open a specific image/video for a specific user
+    openOneContentForOneUser(
         @Req() request: any,
         @Param('contentId') contentId: number,
-        @Param('userId') userId: number
-    ){
+        @Param('userId') userId: number,
+    ) {
         const myUserId: number = request.userId;
 
-        return this.contentService.OpenOneContentForOneUser(contentId, myUserId, userId);
+        return this.contentService.openOneContentForOneUser(contentId, myUserId, userId);
     }
 
     @UseGuards(AuthGuard)
-    @Post('close/:userId') // close all my images/videos for a specific user
-    CloseAllMyContentForOneUser(
+    @Post('/close/:userId') // close all my images/videos for a specific user
+    closeAllMyContentForOneUser(
         @Req() request: any,
         @Param('userId') userId: number
-    ){
+    ) {
         const myUserId: number = request.userId;
 
-        return this.contentService.CloseAllMyContentForOneUser(myUserId, userId);
+        return this.contentService.closeAllMyContentForOneUser(myUserId, userId);
     }
-    
+
     @UseGuards(AuthGuard)
-    @Post('create')
+    @Post('/create')
     @UseInterceptors(FileInterceptor('contentFile')) // string that specifies the field name from the form that holds a file
-    CreateContent(
-        @Body() dto: CreateContentDTO,
-        @UploadedFile() contentFile: Express.Multer.File, 
-        @Req() request: any
-    ){
+    createContent(
+        @Body() dto: CreateContentDto,
+        @UploadedFile() contentFile: Express.Multer.File,
+        @Req() request: any,
+    ) {
         const myUserId: number = request.userId;
 
-        return this.contentService.CreateContent(contentFile, myUserId, dto);
+        return this.contentService.createContent(contentFile, myUserId, dto);
     }
 
     @UseGuards(AuthGuard)
-    @Put(':contentId/edit')
+    @Put('/:contentId/edit')
     @UseInterceptors(FileInterceptor('contentFile'))
-    EditContent(
+    editContent(
         @Param('contentId') contentId: number,
         @UploadedFile() contentFile: Express.Multer.File,
-        @Body() dto: EditContentDTO,
-        @Req() request: any
-    ){
+        @Body() dto: EditContentDto,
+        @Req() request: any,
+    ) {
         const myUserId: number = request.userId;
 
-        return this.contentService.EditContent(contentId, contentFile, dto, myUserId);
+        return this.contentService.editContent(contentId, contentFile, dto, myUserId);
     }
 
-    @Get('video/:fileName')
-    LoadVideo(
+    @Get('/video/:fileName')
+    loadVideo(
         @Param('fileName') fileName: string,
         @Req() request: any,
         @Res() response: any
-    ){
-        return this.contentService.LoadVideo(fileName, request, response);
+    ) {
+        return this.contentService.loadVideo(fileName, request, response);
     }
-};
+}

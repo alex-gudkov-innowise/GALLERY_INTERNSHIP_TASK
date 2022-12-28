@@ -1,4 +1,3 @@
-export class RefreshTokenDTO
-{
+export class RefreshTokenDto {
     readonly refreshToken: string;
-};
+}

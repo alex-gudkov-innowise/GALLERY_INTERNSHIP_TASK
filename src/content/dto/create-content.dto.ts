@@ -1,4 +1,3 @@
-export class CreateContentDTO
-{
+export class CreateContentDto {
     readonly description: string;
-};
+}

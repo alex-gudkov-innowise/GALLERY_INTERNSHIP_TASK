@@ -14,11 +14,11 @@ import { JwtModule } from '@nestjs/jwt';
     imports: [
         TypeOrmModule.forFeature([RolesEntity, UsersEntity, UsersRolesEntity]),
         forwardRef(() => UsersModule),
-        JwtModule.register({}), // register the module 
+        JwtModule.register({}), // register the module
     ],
     exports: [
         RolesService,
         JwtModule
-    ]
+    ],
 })
-export class RolesModule {};
+export class RolesModule {}

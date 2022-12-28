@@ -1,9 +1,8 @@
 import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
 import { UsersRolesEntity } from './users-roles.entity';
 
-@Entity({name: 'roles'})
-export class RolesEntity
-{
+@Entity({ name: 'roles' })
+export class RolesEntity {
     @PrimaryColumn()
     name: string;
 
@@ -13,4 +12,4 @@ export class RolesEntity
     // one role can belong to many users
     @OneToMany(() => UsersRolesEntity, (roleUser: UsersRolesEntity) => roleUser.role)
     roleUsers: UsersRolesEntity[];
-};
+}

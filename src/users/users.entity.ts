@@ -4,9 +4,8 @@ import { ContentEntity } from 'src/content/content.entity';
 import { UsersRolesEntity } from 'src/roles/users-roles.entity';
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
-@Entity({name: 'users'})
-export class UsersEntity
-{
+@Entity({ name: 'users' })
+export class UsersEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -36,11 +35,11 @@ export class UsersEntity
     @OneToMany(() => ContentEntity, (content) => content.id)
     content: ContentEntity[];
 
-    // one user can have no access to many content 
+    // one user can have no access to many content
     @OneToMany(() => ClosedContentEntity, (closedContent: ClosedContentEntity) => closedContent.user)
     closedContent: ContentEntity[];
 
     // one user can have many roles
     @OneToMany(() => UsersRolesEntity, (userRole: UsersRolesEntity) => userRole.user)
     userRoles: UsersRolesEntity[];
-};
+}

@@ -13,12 +13,11 @@ import { UsersEntity } from 'src/users/users.entity';
     imports: [
         forwardRef(() => UsersModule), // use forwardRef() to avoid circular dependency between modules
         TypeOrmModule.forFeature([RefreshTokensEntity, UsersEntity]),
-        JwtModule.register({}), // register the module 
-        forwardRef(() => AuthModule) // use forwardRef() to avoid circular dependency between modules
+        JwtModule.register({}), // register the module
     ],
     exports: [
         AuthService,
         JwtModule
-    ]
+    ],
 })
-export class AuthModule {};
+export class AuthModule {}

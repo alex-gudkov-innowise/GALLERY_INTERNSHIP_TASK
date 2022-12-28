@@ -15,13 +15,17 @@ import { RolesModule } from 'src/roles/roles.module';
     controllers: [UsersController],
     providers: [UsersService],
     imports: [
-        TypeOrmModule.forFeature([UsersEntity, RefreshTokensEntity, ClosedContentEntity, UsersRolesEntity, RolesEntity]),
+        TypeOrmModule.forFeature([
+            UsersEntity,
+            RefreshTokensEntity,
+            ClosedContentEntity,
+            UsersRolesEntity,
+            RolesEntity,
+        ]),
         forwardRef(() => AuthModule), // use forwardRef() to avoid circular dependency between modules
         forwardRef(() => ContentModule),
         forwardRef(() => RolesModule),
     ],
-    exports: [
-        UsersService,
-    ]
+    exports: [UsersService],
 })
-export class UsersModule {};
+export class UsersModule {}

@@ -19,8 +19,6 @@ import { ClosedContentEntity } from './closed-content.entity';
         forwardRef(() => UsersModule),
         FilesModule,
     ],
-    exports: [
-        ContentService,
-    ]
+    exports: [ContentService],
 })
-export class ContentModule {};
+export class ContentModule {}

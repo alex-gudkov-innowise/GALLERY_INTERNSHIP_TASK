@@ -1,5 +1,4 @@
-export class CreateRoleDTO
-{
+export class CreateRoleDto {
     readonly name: string;
     readonly description: string;
-};
+}

@@ -21,7 +21,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
     providers: [],
     imports: [
         ConfigModule.forRoot({
-            envFilePath: `./.${process.env.NODE_ENV}.env`
+            envFilePath: `./.${process.env.NODE_ENV}.env`,
         }),
         MailerModule.forRoot({
             // create transporter object using the default SMTP transport
@@ -66,6 +66,6 @@ import { MailerModule } from '@nestjs-modules/mailer';
         ContentModule,
         FilesModule,
         UsersRolesEntity,
-    ]
+    ],
 })
-export class AppModule {};
+export class AppModule {}
